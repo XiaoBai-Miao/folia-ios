@@ -48,13 +48,13 @@ jobs:
       - name: Archive (unsigned)
         run: |
           cd ios/App
-          ARGS="-configuration Release -destination generic/platform=iOS -archivePath ../../../build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="
+          ARGS="-configuration Release -destination generic/platform=iOS -archivePath ../../build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="
           if [ -d App.xcworkspace ]; then
             xcodebuild -workspace App.xcworkspace -scheme App $ARGS 2>&1 | tail -80
           else
             xcodebuild -project App.xcodeproj -scheme App $ARGS 2>&1 | tail -80
           fi
-          test -d ../../../build/App.xcarchive/Products/Applications/App.app
+          test -d ../../build/App.xcarchive/Products/Applications/App.app
 
       - name: Assemble IPA
         run: |
