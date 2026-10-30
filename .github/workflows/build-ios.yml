@@ -17,8 +17,9 @@ jobs:
 
       - name: Extract sources
         run: |
-          tar -xzf dist.tar.gz
-          tar -xzf ios.tar.gz
+          mkdir -p dist ios
+          tar -xzf dist.tar.gz -C dist
+          tar -xzf ios.tar.gz -C ios
           ls dist | head -5
           ls ios
 
