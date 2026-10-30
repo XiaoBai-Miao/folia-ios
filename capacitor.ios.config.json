@@ -27,6 +27,7 @@
 		}
 	},
 	"packageClassList": [
+		"FoliaNativePlugin",
 		"CAPBrowserPlugin",
 		"CAPHttpPlugin",
 		"SplashScreenPlugin",
