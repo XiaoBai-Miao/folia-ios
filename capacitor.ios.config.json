@@ -1,0 +1,35 @@
+{
+	"appId": "top.izuna.foliamajor",
+	"appName": "Folia",
+"webDir": "dist",
+	"loggingBehavior": "debug",
+	"backgroundColor": "#09090b",
+	"server": {
+		"androidScheme": "https",
+		"iosScheme": "capacitor",
+		"hostname": "localhost",
+		"cleartext": false
+	},
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		},
+		"SplashScreen": {
+			"launchAutoHide": true,
+			"launchShowDuration": 900,
+			"backgroundColor": "#09090b",
+			"showSpinner": false
+		},
+		"StatusBar": {
+			"overlaysWebView": true,
+			"style": "LIGHT",
+			"backgroundColor": "#09090b"
+		}
+	},
+	"packageClassList": [
+		"CAPBrowserPlugin",
+		"CAPHttpPlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin"
+	]
+}
