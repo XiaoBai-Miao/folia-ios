@@ -15,6 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Extract sources
         run: |
           mkdir -p dist ios
@@ -23,11 +27,14 @@ jobs:
           ls dist | head -5
           ls ios
 
-      - name: Sync web assets to iOS public
+      - name: Install Capacitor deps and sync
         run: |
-          rm -rf ios/App/App/public
-          mkdir -p ios/App/App/public
-          cp -R dist/* ios/App/App/public/
+          npm init -y
+          npm install @capacitor/core@8.5.3 @capacitor/cli@8.5.3 @capacitor/ios@8.5.3
+          npx cap sync ios
+          # 用 iOS 专用配置覆盖（启用 CapacitorHttp，绕过 CORS 访问音乐平台 API）。
+          cp capacitor.ios.config.json ios/App/App/capacitor.config.json
+          cp capacitor.ios.config.json ios/App/App/public/capacitor.config.json
 
       - name: Resolve dependencies
         run: |
