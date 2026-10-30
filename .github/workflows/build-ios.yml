@@ -1,0 +1,72 @@
+name: Build Folia iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract sources
+        run: |
+          tar -xzf dist.tar.gz
+          tar -xzf ios.tar.gz
+          ls dist | head -5
+          ls ios
+
+      - name: Sync web assets to iOS public
+        run: |
+          rm -rf ios/App/App/public
+          mkdir -p ios/App/App/public
+          cp -R dist/* ios/App/App/public/
+
+      - name: Resolve dependencies
+        run: |
+          cd ios/App
+          if [ -d App.xcworkspace ]; then
+            xcodebuild -workspace App.xcworkspace -scheme App -resolvePackageDependencies || true
+          else
+            xcodebuild -project App.xcodeproj -scheme App -resolvePackageDependencies || true
+          fi
+
+      - name: Archive (unsigned)
+        run: |
+          cd ios/App
+          ARGS="-configuration Release -destination generic/platform=iOS -archivePath ../../../build/App.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="
+          if [ -d App.xcworkspace ]; then
+            xcodebuild -workspace App.xcworkspace -scheme App $ARGS 2>&1 | tail -80
+          else
+            xcodebuild -project App.xcodeproj -scheme App $ARGS 2>&1 | tail -80
+          fi
+          test -d ../../../build/App.xcarchive/Products/Applications/App.app
+
+      - name: Assemble IPA
+        run: |
+          brew install ldid || true
+          rm -rf Payload && mkdir Payload
+          cp -R build/App.xcarchive/Products/Applications/App.app Payload/Folia.app
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Folia" Payload/Folia.app/Info.plist
+          ldid -S Payload/Folia.app/App
+          zip -qry folia-ios.ipa Payload
+          ls -lh folia-ios.ipa
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: folia-ios
+          path: folia-ios.ipa
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER=ios.$(date +%m%d%H%M)
+          gh release create "$VER" folia-ios.ipa --title "Folia iOS $VER" --notes "Folia iOS (Capacitor 8, unsigned IPA for sideloading)" || true
